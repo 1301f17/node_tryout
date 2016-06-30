@@ -22,8 +22,19 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+// Make our db accessible to our router
+app.use(function(req,res,next){
+  req.db = db;
+  next();
+});
+
 app.use('/', routes);
 app.use('/users', users);
+
+
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -54,6 +65,26 @@ app.use(function(err, req, res, next) {
     message: err.message,
     error: {}
   });
+});
+
+var MongoClient = require('mongodb').MongoClient
+    , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/test';
+
+// Use connect method to connect to the server
+MongoClient.connect(url, function(err, database) {
+  db = database
+  assert.equal(null, err);
+  console.log("Connected succesfully to server");
+  
+});
+
+
+
+app.listen(3000, function () {
+  console.log('Example app listening on port 3000!');
 });
 
 
