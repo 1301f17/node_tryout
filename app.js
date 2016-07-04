@@ -8,6 +8,8 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
+var users_model = require('./models/users');
+
 var app = express();
 
 // view engine setup
@@ -23,11 +25,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-// Make our db accessible to our router
-app.use(function(req,res,next){
-  req.db = db;
-  next();
-});
 
 app.use('/', routes);
 app.use('/users', users);
@@ -67,19 +64,9 @@ app.use(function(err, req, res, next) {
   });
 });
 
-var MongoClient = require('mongodb').MongoClient
-    , assert = require('assert');
 
-// Connection URL
-var url = 'mongodb://localhost:27017/test';
-
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, database) {
-  db = database
-  assert.equal(null, err);
-  console.log("Connected succesfully to server");
-  
-});
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/test');
 
 
 
