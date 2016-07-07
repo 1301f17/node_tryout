@@ -7,5 +7,12 @@
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
+    <br>
+    <p>Insert users</p>
+    <form action="/users/insert" method="POST">
+      Name:<br>
+      <input type="text" name="name">
+      <input type="submit" value="Submit">
+    </form>
   </body>
 </html>
