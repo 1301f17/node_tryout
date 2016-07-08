@@ -5,6 +5,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+var passport = require('passport');
+var passportLocal = require('passport-local');
+var expressSession = require('express-session');
+var flash = require('connect-flash');
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var posts = require('./routes/posts');
@@ -18,6 +23,8 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+
+
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -26,7 +33,39 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(expressSession({ secret: 'keyboard cat' }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+
+
+// defind strategy for authentication
+passport.use(new passportLocal(
+    function(username, password, done) {
+      mongoose.model('user').findOne({ username: username }, function(err, user) {
+        if (err) { return done(err); }
+        if (!user) {
+          return done(null, false, { message: 'Incorrect username.' });
+        }
+        if (user.password != password) {
+          return done(null, false, { message: 'Incorrect password.' });
+        }
+        return done(null, user); // put user object into req.user
+      });
+    }
+));
+
+// serialize and deserialize user instances to and from the session.
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  mongoose.model('user').findById(id, function(err, user) {
+    done(err, user);
+  });
+});
 
 app.use('/', routes);
 app.use('/users', users);
