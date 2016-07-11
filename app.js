@@ -48,10 +48,15 @@ passport.use(new passportLocal(
         if (!user) {
           return done(null, false, { message: 'Incorrect username.' });
         }
-        if (user.password != password) {
-          return done(null, false, { message: 'Incorrect password.' });
-        }
-        return done(null, user); // put user object into req.user
+        user.comparePassword(password, function(err, isMatch) {
+          if (isMatch) {
+            return done(null, user); // put user object into req.user
+
+          } else {
+            return done(null, false, { message: 'Incorrect password.' });
+          }
+        });
+
       });
     }
 ));
