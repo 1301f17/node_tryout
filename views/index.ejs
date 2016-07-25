@@ -10,29 +10,30 @@
     <% } %>
 
     <%if (isAuthenticated) { %>
-    <h1>hello: <%= user.username %> <a href="/users/logout">log out</a></h1>
+    <h1>hello: <%= user.name %> <a href="/users/logout">log out</a></h1>
     <% } %>
 
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
     <br>
 
-    <p>Sign up</p>
-    <form action="/users/signup" method="POST">
-      Name:<br>
-      <input type="text" name="username">
-      <input type="text" name="password">
-      <input type="submit" value="Submit">
-    </form>
+    <!--<p>Sign up</p>-->
+    <!--<form action="/users/signup" method="POST">-->
+      <!--Name:<br>-->
+      <!--<input type="text" name="username">-->
+      <!--<input type="text" name="password">-->
+      <!--<input type="submit" value="Submit">-->
+    <!--</form>-->
 
     <%if (!isAuthenticated) { %>
     <p>Login</p>
-    <form action="/users/login" method="POST">
-      Name:<br>
-      <input type="text" name="username">
-      <input type="text" name="password">
-      <input type="submit" value="Submit">
-    </form>
+    <!--<form action="/users/login" method="POST">-->
+      <!--Name:<br>-->
+      <!--<input type="text" name="username">-->
+      <!--<input type="text" name="password">-->
+      <!--<input type="submit" value="Submit">-->
+    <!--</form>-->
+    <a href="/users/auth/facebook">Login with Facebook</a>
     <% } %>
 
   </body>

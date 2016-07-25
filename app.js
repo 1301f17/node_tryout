@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var passport = require('passport');
 var passportLocal = require('passport-local');
+var FacebookStrategy = require('passport-facebook').Strategy;
 var expressSession = require('express-session');
 var flash = require('connect-flash');
 
@@ -41,35 +42,67 @@ app.use(flash());
 
 
 // defind strategy for authentication
-passport.use(new passportLocal(
-    function(username, password, done) {
-      mongoose.model('user').findOne({ username: username }, function(err, user) {
-        if (err) { return done(err); }
-        if (!user) {
-          return done(null, false, { message: 'Incorrect username.' });
-        }
-        user.comparePassword(password, function(err, isMatch) {
-          if (isMatch) {
-            return done(null, user); // put user object into req.user
+// passport.use(new passportLocal(
+//     function(username, password, done) {
+//       mongoose.model('user').findOne({ username: username }, function(err, user) {
+//         if (err) { return done(err); }
+//         if (!user) {
+//           return done(null, false, { message: 'Incorrect username.' });
+//         }
+//         user.comparePassword(password, function(err, isMatch) {
+//           if (isMatch) {
+//             return done(null, user); // put user object into req.user
+//
+//           } else {
+//             return done(null, false, { message: 'Incorrect password.' });
+//           }
+//         });
+//
+//       });
+//     }
+// ));
 
-          } else {
-            return done(null, false, { message: 'Incorrect password.' });
+passport.use(new FacebookStrategy({
+      clientID: '828170640653332',
+      clientSecret: '60caf613858af44a493215f1041ef1bf',
+      callbackURL: "/users/auth/facebook/callback"
+    },
+    function(accessToken, refreshToken, profile, done) {
+      process.nextTick(function () {
+        mongoose.model('user').findOne({'id': profile.id}, function(err, user) {
+          if (err) { return done(err); }
+          if (user) {return done(null, user);}
+          else {
+            User = mongoose.model('user');
+            var newUser = new User();
+            newUser.id = profile.id;
+            newUser.token = accessToken;
+            newUser.name = profile.displayName;
+            newUser.save(function(err){
+              if(err)
+                throw err;
+              return done(null, newUser);
+            });
+            console.log(profile);
           }
         });
-
       });
     }
 ));
 
 // serialize and deserialize user instances to and from the session.
 passport.serializeUser(function(user, done) {
-  done(null, user.id);
+  //done(null, user.id);
+  done(null, user);
 });
 
-passport.deserializeUser(function(id, done) {
-  mongoose.model('user').findById(id, function(err, user) {
-    done(err, user);
-  });
+// passport.deserializeUser(function(id, done) {
+//   mongoose.model('user').findById(id, function(err, user) {
+//     done(err, user);
+//   });
+// });
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
 });
 
 app.use('/', routes);
